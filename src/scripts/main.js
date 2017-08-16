@@ -1,7 +1,7 @@
 setTimeout(()=> {
-    GameBackbone({
-        init: GAME_INIT,
-        update: GAME_UPDATE,
-        render: GAME_RENDER
-    });
+    GAME_INIT();
+    MAIN_CANVAS.fpf((step)=>{
+        MAIN_CANVAS.clean();
+        GAME_RENDER();
+    })
 }, 0);

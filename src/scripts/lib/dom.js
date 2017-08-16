@@ -62,3 +62,47 @@ DOM.prototype.dimention = function(w, h){
     this.height = h;
     return this;
 };
+DOM.prototype.captureTouch = function(){
+    var data = {
+        x: null,
+        y: null,
+        isPressed: false,
+        event: null
+    };
+    var bodyScrollLeft = document.body.scrollLeft;
+    var elScrollLeft   = document.documentElement.scrollLeft;
+    var bodyScrollTop  = document.body.scrollTop;
+    var elScrollTop    = document.documentElement.scrollTop;
+    var offsetLeft     = this.selfie.offsetLeft;
+    var offsetTop      = this.selfie.offsetTop;
+
+    this.selfie.addEventListener('touchstart', function(evt){
+        data.isPressed = true;
+        data.event = evt;
+    }, false);
+
+    this.selfie.addEventListener('touchend', function(evt){
+        data.isPressed = false;
+        data.x = null;
+        data.y = null;
+        data.event = evt;
+    }, false);
+
+    this.selfie.addEventListener('touchmove', function(evt){
+        var x,
+            y,
+            touched = evt.touches[0]; //first touch
+        if(touched.pageX || touched.pageY){
+            x = touched.pageX;
+            y = touched.pageY;
+        } else {
+            x = touched.clientX + bodyScrollLeft + elScrollLeft;
+            y = touched.clientY + bodyScrollTop + elScrollTop;
+        }
+        x -= offsetLeft;
+        y -= offsetTop;
+        data.event = evt;
+    }, false);
+
+    return touched;
+};
