@@ -1,8 +1,8 @@
-function ContainerPlayer(){};
-ContainerPlayer.prototype.init = function(ctx){
+$.c.Player = function(){};
+$.c.Player.prototype.init = function(ctx){
     this.ctx = ctx;
-    this.x = MAIN_CANVAS_WIDTH / 2;
-    this.y = MAIN_CANVAS_HEIGHT / 2;
+    this.x = $.global.MainWidth() / 2;
+    this.y = $.global.MainHeight() / 2;
     this.shape = new FixtureSquare(
         this.x, 
         this.y,
@@ -11,22 +11,21 @@ ContainerPlayer.prototype.init = function(ctx){
     );
     this.tX = false;
     this.tY = false;
-    this.bindEvents();
+    this.bindEvt();
 };
-ContainerPlayer.prototype.bindEvents = function(){
-    var offsetLeft = MAIN_EL_CANVAS.offsetLeft;
-    var offsetTop = MAIN_EL_CANVAS.offsetTop;
+$.c.Player.prototype.bindEvt = function(){
+    var mousePosition = $.global.MainC().mousePosition();
     var that = this;
 
-    MAIN_EL_CANVAS.addEventListener("click", (evt) => {
-        //this.shape.x = evt.pageX - offsetLeft;
-        //this.shape.y = evt.pageY - offsetTop;
-        this.tX = evt.pageX - offsetLeft; 
-        this.tY = evt.pageY - offsetTop;
+    $.global.MainEC.addEventListener("click", (evt) => {
+        //this.shape.x = mousePosition.x;
+        //this.shape.y = mousePosition.y;
+        this.tX = mousePosition.x; 
+        this.tY = mousePosition.y;
     }, false);
 };
 
-ContainerPlayer.prototype.translate = function(aX, aY, tX, tY){
+$.c.Player.prototype.translate = function(aX, aY, tX, tY){
     if(tX && tY){
         var dX = tX - aX;
         var dY = tY - aY;
@@ -36,7 +35,7 @@ ContainerPlayer.prototype.translate = function(aX, aY, tX, tY){
         this.shape.y += vY;
     }
 };
-ContainerPlayer.prototype.render = function(){
+$.c.Player.prototype.render = function(){
     this.translate(this.shape.x, this.shape.y, this.tX, this.tY);
     this.shape.draw(this.ctx);
 };

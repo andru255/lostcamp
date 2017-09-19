@@ -1,6 +1,9 @@
-var HORDES  = 3;
+var $ = {};
+//containers
+$.c = {};
+$.HORDES  = 3;
 // ENUMS CONTROLS
-var KEYS = {
+$.KEYS = {
     UP: 38,
     DOWN: 40,
     SPACE: 32

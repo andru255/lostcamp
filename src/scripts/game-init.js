@@ -1,29 +1,44 @@
-var player = new ContainerPlayer();
-var miniMap = new ContainerMinimap();
 /* start init fns*/
-var GAME_INIT = function(){
+$.init = function(){
     // core - elements
-    window.MAIN_EL_CANVAS = new DOM("main", false, "canvas").selfie;
-    window.MAIN_CANVAS = new CANVAS(MAIN_EL_CANVAS);
-    window.MAIN_CONTEXT = MAIN_CANVAS.getCtx();
-
-    window.MINIMAP_EL_CANVAS = new DOM("minimap", false, "canvas").selfie;
-    window.MINIMAP_CANVAS = new CANVAS(MINIMAP_EL_CANVAS);
-    window.MINIMAP_CONTEXT = MINIMAP_CANVAS.getCtx();
-
-    //core - dimentions
-    window.MAIN_CANVAS_WIDTH    = MAIN_EL_CANVAS.width;
-    window.MAIN_CANVAS_HEIGHT   = MAIN_EL_CANVAS.height;
-    window.MINIMAP_CANVAS_WIDTH    = MINIMAP_EL_CANVAS.width;
-    window.MINIMAP_CANVAS_HEIGHT   = MINIMAP_EL_CANVAS.height;
-
-    // BOUNDS
-    window.MAIN_CANVAS_BOUNDS = {
-        TOP: 0,
-        LEFT: 0,
-        RIGHT: MAIN_CANVAS_WIDTH,
-        BOTTOM: MAIN_CANVAS_HEIGHT
+    $.global = {
+        //elements
+        MainEC: new DOM("main", false, "canvas").selfie,
+        MainC: () => new CANVAS($.global.MainEC),
+        MainCtx: () => $.global.MainC().getCtx(),
+        MiniEC: new DOM("minimap", false, "canvas").selfie,
+        MiniC: () => new CANVAS($.global.MiniEC),
+        MiniCtx: () => $.global.MiniC().getCtx(),
+        //dimentions
+        MainWidth: () => $.global.MainEC.width,
+        MainHeight: () => $.global.MainEC.height,
+        MiniWidth: () => Math.floor($.global.MainWidth() * 0.1),
+        MiniHeight: () => Math.floor($.global.MainHeight() * 0.1),
+        MainCBounds: {
+            t: ()=> 0, 
+            l: ()=> 0, 
+            r: ()=> $.global.MainWidth(), 
+            b: ()=> $.global.MainHeight()
+        }
     };
-    player.init(MAIN_CONTEXT);
-    miniMap.init(MINIMAP_CONTEXT);
+    $.fs = [];
+    $.i = {};
+
+    (function(main, mini){
+        $.i.main = new $.c.MainMap();
+        $.i.main.init(main);
+        //factories
+        var numfactories = 10;
+        var j = 100;
+        for(var i = 0; i < numfactories; i++){
+            $.i.f = new $.c.Factory(); 
+            $.i.f.init(j, j, main);
+            $.fs.push($.i.f);
+            j += 100;
+        }
+        $.i.p = new $.c.Player();
+        $.i.p.init(main);
+        //$.i.mini = new $.c.MiniMap();
+        //$.i.mini.init(mini);
+    })($.global.MainCtx(), $.global.MiniCtx())
 };

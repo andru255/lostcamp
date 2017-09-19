@@ -1,6 +1,8 @@
 /* start render fns*/
-function GAME_RENDER(){
-    player.render();
-    miniMap.render();
+$.render = function(){
+    $.i.main.render();
+    $.fs.map((f) => f.render())
+    $.i.p.render();
+    //$.i.mini.render();
 };
 /* end render fns*/

@@ -1,15 +1,16 @@
 function Fixture(){
-    this.velocityX = 0;
-    this.velocityY = 0;
-    this.velocityZ = 0;
-    this.friction  = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.vz = 0;
+    //friction
+    this.fr  = 0;
     this.debug     = true;
 }
 Fixture.prototype.fillAndStroke = function(ctx){
     ctx.fillStyle = this.style || false;
     ctx.fill();
     if(this.lineWidth > 0){
-        ctx.strokeStyle = this.stroke || false;
+        ctx.strokeStyle = this.strokeStyle || false;
         ctx.lineWidth = this.lineWidth || 0;
     }
     ctx.stroke();

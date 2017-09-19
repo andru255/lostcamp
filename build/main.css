@@ -1,4 +1,19 @@
+/*tags*/
 canvas {
     border: 1px solid #bbb;
     background: #ddd;
+}
+/*ids*/
+#minimap {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+/*classes*/
+.container-canvas {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 0;
+    padding: 0;
 }

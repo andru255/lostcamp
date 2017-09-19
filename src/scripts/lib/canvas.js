@@ -51,3 +51,35 @@ CANVAS.prototype.fpf = function(onStep){
         onStep && onStep.call(this, step)
     })()
 };
+CANVAS.prototype.mousePosition = function(){
+    var mouse = {x: 0, y:0, event:null};
+    var bodyScroll = {
+        left: document.body.scrollLeft,
+        top: document.body.scrollTop,
+    };
+    var documentEl = {
+        left: document.documentElement.scrollLeft,
+        top: document.documentElement.scrollTop
+    };
+    var offsetLeftEl = this.selfie.offsetLeft;
+    var offsetTopEl = this.selfie.offsetTop;
+
+    this.selfie.addEventListener('mousemove', function(evt){
+        var x;
+        var y;
+        if(event.pageX || event.pageY){
+            x = event.pageX;
+            y = event.pageY;
+        } else {
+            x = event.clientX + bodyScroll.left + documentEl.scrollLeft;
+            y = event.clientX + bodyScroll.left + documentEl.scrollLeft;
+        }
+        x -= offsetLeftEl;
+        y -= offsetTopEl;
+        mouse.x = x;
+        mouse.y = y;
+        mouse.event = evt;
+    }, false);
+
+    return mouse;
+}

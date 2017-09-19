@@ -1,7 +1,7 @@
 setTimeout(()=> {
-    GAME_INIT();
-    MAIN_CANVAS.fpf((step)=>{
-        MAIN_CANVAS.clean();
-        GAME_RENDER();
+    $.init();
+    $.global.MainC().fpf((step)=>{
+        $.global.MainC().clean();
+        $.render();
     })
 }, 0);

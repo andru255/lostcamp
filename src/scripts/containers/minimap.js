@@ -1,8 +1,8 @@
-function ContainerMinimap(){};
-ContainerMinimap.prototype.init = function(ctx){
+$.c.MiniMap = function(){};
+$.c.MiniMap.prototype.init = function(ctx){
     this.ctx = ctx;
-    this.x = MINIMAP_CANVAS_WIDTH / 2;
-    this.y = MINIMAP_CANVAS_HEIGHT / 2;
+    this.x = $.global.MiniWidth() / 2;
+    this.y = $.global.MiniHeight() / 2;
     this.shape = new FixtureSquare(
         this.x, 
         this.y,
@@ -11,8 +11,8 @@ ContainerMinimap.prototype.init = function(ctx){
     );
     this.shape.style = "transparent";
     this.shape.lineWidth = 2;
-    this.shape.stroke = "blue";
+    this.shape.strokeStyle = "blue";
 };
-ContainerMinimap.prototype.render = function(){
+$.c.MiniMap.prototype.render = function(){
     this.shape.draw(this.ctx);
 };

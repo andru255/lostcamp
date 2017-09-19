@@ -1,92 +1,176 @@
-var HORDES = 3;
+var $ = {};
+//containers
+$.c = {};
+$.HORDES = 3;
 // ENUMS CONTROLS
-var KEYS = {
+$.KEYS = {
     UP: 38,
     DOWN: 40,
     SPACE: 32
 };
-var player = new ContainerPlayer();
-var miniMap = new ContainerMinimap();
 /* start init fns*/
-var GAME_INIT = function GAME_INIT() {
+$.init = function () {
     // core - elements
-    window.MAIN_EL_CANVAS = new DOM("main", false, "canvas").selfie;
-    window.MAIN_CANVAS = new CANVAS(MAIN_EL_CANVAS);
-    window.MAIN_CONTEXT = MAIN_CANVAS.getCtx();
-
-    window.MINIMAP_EL_CANVAS = new DOM("minimap", false, "canvas").selfie;
-    window.MINIMAP_CANVAS = new CANVAS(MINIMAP_EL_CANVAS);
-    window.MINIMAP_CONTEXT = MINIMAP_CANVAS.getCtx();
-
-    //core - dimentions
-    window.MAIN_CANVAS_WIDTH = MAIN_EL_CANVAS.width;
-    window.MAIN_CANVAS_HEIGHT = MAIN_EL_CANVAS.height;
-    window.MINIMAP_CANVAS_WIDTH = MINIMAP_EL_CANVAS.width;
-    window.MINIMAP_CANVAS_HEIGHT = MINIMAP_EL_CANVAS.height;
-
-    // BOUNDS
-    window.MAIN_CANVAS_BOUNDS = {
-        TOP: 0,
-        LEFT: 0,
-        RIGHT: MAIN_CANVAS_WIDTH,
-        BOTTOM: MAIN_CANVAS_HEIGHT
+    $.global = {
+        //elements
+        MainEC: new DOM("main", false, "canvas").selfie,
+        MainC: function MainC() {
+            return new CANVAS($.global.MainEC);
+        },
+        MainCtx: function MainCtx() {
+            return $.global.MainC().getCtx();
+        },
+        MiniEC: new DOM("minimap", false, "canvas").selfie,
+        MiniC: function MiniC() {
+            return new CANVAS($.global.MiniEC);
+        },
+        MiniCtx: function MiniCtx() {
+            return $.global.MiniC().getCtx();
+        },
+        //dimentions
+        MainWidth: function MainWidth() {
+            return $.global.MainEC.width;
+        },
+        MainHeight: function MainHeight() {
+            return $.global.MainEC.height;
+        },
+        MiniWidth: function MiniWidth() {
+            return Math.floor($.global.MainWidth() * 0.1);
+        },
+        MiniHeight: function MiniHeight() {
+            return Math.floor($.global.MainHeight() * 0.1);
+        },
+        MainCBounds: {
+            t: function t() {
+                return 0;
+            },
+            l: function l() {
+                return 0;
+            },
+            r: function r() {
+                return $.global.MainWidth();
+            },
+            b: function b() {
+                return $.global.MainHeight();
+            }
+        }
     };
-    player.init(MAIN_CONTEXT);
-    miniMap.init(MINIMAP_CONTEXT);
+    $.fs = [];
+    $.i = {};
+
+    (function (main, mini) {
+        $.i.main = new $.c.MainMap();
+        $.i.main.init(main);
+        //factories
+        var numfactories = 10;
+        var j = 100;
+        for (var i = 0; i < numfactories; i++) {
+            $.i.f = new $.c.Factory();
+            $.i.f.init(j, j, main);
+            $.fs.push($.i.f);
+            j += 100;
+        }
+        $.i.p = new $.c.Player();
+        $.i.p.init(main);
+        //$.i.mini = new $.c.MiniMap();
+        //$.i.mini.init(mini);
+    })($.global.MainCtx(), $.global.MiniCtx());
 };
 /* start render fns*/
-function GAME_RENDER() {
-    player.render();
-    miniMap.render();
+$.render = function () {
+    $.i.main.render();
+    $.fs.map(function (f) {
+        return f.render();
+    });
+    $.i.p.render();
+    //$.i.mini.render();
 };
 /* end render fns*/
 setTimeout(function () {
-    GAME_INIT();
-    MAIN_CANVAS.fpf(function (step) {
-        MAIN_CANVAS.clean();
-        GAME_RENDER();
+    $.init();
+    $.global.MainC().fpf(function (step) {
+        $.global.MainC().clean();
+        $.render();
     });
 }, 0);
-
-function ContainerMinimap() {};
-ContainerMinimap.prototype.init = function (ctx) {
+$.c.Factory = function () {};
+$.c.Factory.prototype.init = function (x, y, ctx) {
     this.ctx = ctx;
-    this.x = MINIMAP_CANVAS_WIDTH / 2;
-    this.y = MINIMAP_CANVAS_HEIGHT / 2;
+    this.x = x;
+    this.y = y;
+    this.shape = new FixtureSquare(this.x, this.y, 20, 20);
+    this.shape.style = "#df0";
+    this.shape.lineWidth = 2;
+    this.shape.strokeStyle = "blue";
+};
+$.c.Factory.prototype.render = function () {
+    this.shape.draw(this.ctx);
+};
+$.c.MainMap = function () {};
+$.c.MainMap.prototype.init = function (ctx) {
+    this.ctx = ctx;
+    this.x = 0;
+    this.y = 0;
+    this.shape = new FixtureSquare(this.x, this.y, 1000, 1000);
+    var grd = this.ctx.createLinearGradient(0, 0, 1000, 0);
+    grd.addColorStop(0, "orange");
+    grd.addColorStop(1, "#d0f");
+    this.shape.style = grd;
+    this.shape.lineWidth = 2;
+    this.shape.strokeStyle = "blue";
+    //this.ctx.translate(-500, -500);
+};
+$.c.MainMap.prototype.listen = function (objs) {
+    var player = objs.player;
+    var pposX = -1 * (player.shape.x - $.global.MainWidth() / 2);
+    if (pposX < -100) {
+        pposX = -600;
+    } else if (pposX > 0) {
+        pposX = 0;
+    }
+    this.shape.x = pposX;
+};
+$.c.MainMap.prototype.render = function () {
+    this.shape.draw(this.ctx);
+};
+$.c.MiniMap = function () {};
+$.c.MiniMap.prototype.init = function (ctx) {
+    this.ctx = ctx;
+    this.x = $.global.MiniWidth() / 2;
+    this.y = $.global.MiniHeight() / 2;
     this.shape = new FixtureSquare(this.x, this.y, 20, 20);
     this.shape.style = "transparent";
     this.shape.lineWidth = 2;
-    this.shape.stroke = "blue";
+    this.shape.strokeStyle = "blue";
 };
-ContainerMinimap.prototype.render = function () {
+$.c.MiniMap.prototype.render = function () {
     this.shape.draw(this.ctx);
 };
-function ContainerPlayer() {};
-ContainerPlayer.prototype.init = function (ctx) {
+$.c.Player = function () {};
+$.c.Player.prototype.init = function (ctx) {
     this.ctx = ctx;
-    this.x = MAIN_CANVAS_WIDTH / 2;
-    this.y = MAIN_CANVAS_HEIGHT / 2;
+    this.x = $.global.MainWidth() / 2;
+    this.y = $.global.MainHeight() / 2;
     this.shape = new FixtureSquare(this.x, this.y, 50, 50);
     this.tX = false;
     this.tY = false;
-    this.bindEvents();
+    this.bindEvt();
 };
-ContainerPlayer.prototype.bindEvents = function () {
+$.c.Player.prototype.bindEvt = function () {
     var _this = this;
 
-    var offsetLeft = MAIN_EL_CANVAS.offsetLeft;
-    var offsetTop = MAIN_EL_CANVAS.offsetTop;
+    var mousePosition = $.global.MainC().mousePosition();
     var that = this;
 
-    MAIN_EL_CANVAS.addEventListener("click", function (evt) {
-        //this.shape.x = evt.pageX - offsetLeft;
-        //this.shape.y = evt.pageY - offsetTop;
-        _this.tX = evt.pageX - offsetLeft;
-        _this.tY = evt.pageY - offsetTop;
+    $.global.MainEC.addEventListener("click", function (evt) {
+        //this.shape.x = mousePosition.x;
+        //this.shape.y = mousePosition.y;
+        _this.tX = mousePosition.x;
+        _this.tY = mousePosition.y;
     }, false);
 };
 
-ContainerPlayer.prototype.translate = function (aX, aY, tX, tY) {
+$.c.Player.prototype.translate = function (aX, aY, tX, tY) {
     if (tX && tY) {
         var dX = tX - aX;
         var dY = tY - aY;
@@ -96,7 +180,7 @@ ContainerPlayer.prototype.translate = function (aX, aY, tX, tY) {
         this.shape.y += vY;
     }
 };
-ContainerPlayer.prototype.render = function () {
+$.c.Player.prototype.render = function () {
     this.translate(this.shape.x, this.shape.y, this.tX, this.tY);
     this.shape.draw(this.ctx);
 };
@@ -143,6 +227,38 @@ CANVAS.prototype.fpf = function (onStep) {
         that.sfpf = window.requestAnimationFrame(step, that.selfie);
         onStep && onStep.call(this, step);
     })();
+};
+CANVAS.prototype.mousePosition = function () {
+    var mouse = { x: 0, y: 0, event: null };
+    var bodyScroll = {
+        left: document.body.scrollLeft,
+        top: document.body.scrollTop
+    };
+    var documentEl = {
+        left: document.documentElement.scrollLeft,
+        top: document.documentElement.scrollTop
+    };
+    var offsetLeftEl = this.selfie.offsetLeft;
+    var offsetTopEl = this.selfie.offsetTop;
+
+    this.selfie.addEventListener('mousemove', function (evt) {
+        var x;
+        var y;
+        if (event.pageX || event.pageY) {
+            x = event.pageX;
+            y = event.pageY;
+        } else {
+            x = event.clientX + bodyScroll.left + documentEl.scrollLeft;
+            y = event.clientX + bodyScroll.left + documentEl.scrollLeft;
+        }
+        x -= offsetLeftEl;
+        y -= offsetTopEl;
+        mouse.x = x;
+        mouse.y = y;
+        mouse.event = evt;
+    }, false);
+
+    return mouse;
 };
 var DOM = function DOM(elementName, type, tagToCreate, target) {
     this.elementName = elementName;
@@ -253,17 +369,18 @@ DOM.prototype.captureTouch = function () {
     return touched;
 };
 function Fixture() {
-    this.velocityX = 0;
-    this.velocityY = 0;
-    this.velocityZ = 0;
-    this.friction = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.vz = 0;
+    //friction
+    this.fr = 0;
     this.debug = true;
 }
 Fixture.prototype.fillAndStroke = function (ctx) {
     ctx.fillStyle = this.style || false;
     ctx.fill();
     if (this.lineWidth > 0) {
-        ctx.strokeStyle = this.stroke || false;
+        ctx.strokeStyle = this.strokeStyle || false;
         ctx.lineWidth = this.lineWidth || 0;
     }
     ctx.stroke();
@@ -277,8 +394,8 @@ Fixture.prototype.showDebugMode = function (ctx) {
     ctx.fill();
     ctx.restore();
 };
-var FixtureCircle = function FixtureCircle(x, y, radius) {
-    this.radius = radius;
+var FixtureCircle = function FixtureCircle(x, y, r) {
+    this.r = r;
     this.x = x;
     this.y = y;
 };
@@ -286,23 +403,23 @@ FixtureCircle.prototype = new Fixture.prototype.constructor();
 FixtureCircle.prototype.draw = function (ctx) {
     ctx.save();
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+    ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
     this.__proto__.fillAndStroke.call(this, ctx);
     ctx.closePath();
     ctx.restore();
 };
-var FixturePolygon = function FixturePolygon(x, y, vertices) {
+var FixturePolygon = function FixturePolygon(x, y, vs) {
     this.x = x;
     this.y = y;
-    this.vertices = vertices || [{ x: 10, y: 10 }];
+    this.vs = vs || [{ x: 10, y: 10 }];
 };
 FixturePolygon.prototype = new Fixture.prototype.constructor();
 FixturePolygon.prototype.draw = function (ctx) {
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
-    this.vertices.map(function (element) {
-        ctx.lineTo(element.x, element.y);
+    this.vertices.map(function (e) {
+        ctx.lineTo(e.x, e.y);
     });
     this.__proto__.fillAndStroke.call(this, ctx);
     ctx.closePath();
