@@ -17,7 +17,8 @@ $.c.Player.prototype.bindEvt = function(){
     var mousePosition = $.global.MainC().mousePosition();
     var that = this;
 
-    $.global.MainEC.addEventListener("click", (evt) => {
+    $.global.MainEC.addEventListener("mousedown", (evt) => {
+        console.log(`x: ${mousePosition.x}, y: ${mousePosition.y}`);
         //this.shape.x = mousePosition.x;
         //this.shape.y = mousePosition.y;
         this.tX = mousePosition.x; 
