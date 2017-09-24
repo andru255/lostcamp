@@ -27,6 +27,8 @@ $.init = function(){
     (function(main, mini){
         $.i.main = new $.c.MainMap();
         $.i.main.init(main);
+        $.i.main.bindEvt();
+
         //factories
         var numfactories = 10;
         var j = 100;

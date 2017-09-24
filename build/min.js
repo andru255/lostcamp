@@ -61,6 +61,8 @@ $.init = function () {
     (function (main, mini) {
         $.i.main = new $.c.MainMap();
         $.i.main.init(main);
+        $.i.main.bindEvt();
+
         //factories
         var numfactories = 10;
         var j = 100;
@@ -91,6 +93,51 @@ setTimeout(function () {
         $.render();
     });
 }, 0);
+$.c.Camera = function () {};
+$.c.Camera.prototype.init = function (ctx) {
+    this.ctx = ctx;
+    this.x = 0;
+    this.y = 0;
+    // for debug
+};
+$.c.Camera.prototype.setup = function (xView, yView, canvasWidth, canvasHeight, floorWidth, floorHeight) {
+    //Camera position
+    this.xView = xView || 0;
+    this.yView = yView || 0;
+    //Distance
+    this.xMinDistance = 0;
+    this.yMinDistance = 0;
+    //Viewport dimentions
+    this.widthView = canvasWidth;
+    this.heightView = canvasHeight;
+    //object to follow
+    this.followed = null;
+
+    //rectangle to represent viewport?
+    this.viewPortRect = new FixtureSquare(this.xView, this.yView, this.widthView, this.heightView);
+    //rectangle to represent floor?
+    this.floorRect = new FixtureSquare(0, 0, floorWidth, floorHeight);
+};
+$.c.Camera.prototype.follow = function (objToFollow, xMinDistance, yMinDistance) {
+    this.followed = objToFollow;
+    this.xMinDistance = xMinDistance;
+    this.yMinDistance = yMinDistance;
+};
+$.c.Camera.prototype.update = function () {
+    if (this.followed) {
+        //left <-> right
+        if (this.followed.x - this.xView + this.xMinDistance > this.widthView) {
+            this.xView = this.followed.x - (this.widthView - this.xMinDistance);
+        } else if (this.followed.x - this.xMinDistance < this.xView) {
+            this.xView = this.followed.x - this.xMinDistance;
+        }
+    }
+    //update viewport position
+    //this.viewPortRect.set(...)
+
+    //don't let the camera the floor's boundary
+    //if(!this.viewPortRect.within..)
+};
 $.c.Factory = function () {};
 $.c.Factory.prototype.init = function (x, y, ctx) {
     this.ctx = ctx;
@@ -112,21 +159,28 @@ $.c.MainMap.prototype.init = function (ctx) {
     //for debug
     this.grid = new GRID(1000, 1000);
     this.grid.generate();
-    //this.shape = new FixtureSquare(
-    //    this.x, 
-    //    this.y,
-    //    1000,
-    //    1000
-    //);
-    //var grd = this.ctx.createLinearGradient(0, 0, 1000, 0);
-    //grd.addColorStop(0, "orange");
-    //grd.addColorStop(1, "#d0f");
-    //this.shape.style = grd;
-    //this.shape.lineWidth = 2;
-    //this.shape.strokeStyle = "blue";
-    //this.ctx.translate(-500, -500);
 };
-
+$.c.MainMap.prototype.bindEvt = function () {
+    var mousePosition = $.global.MainC().mousePosition();
+    $.global.MainEC.addEventListener("mousemove", function () {
+        var sides = {
+            left: $.global.MainCBounds.l() + 100 > mousePosition.x && mousePosition.x > 0,
+            right: $.global.MainCBounds.r() - 100 < mousePosition.x,
+            top: $.global.MainCBounds.t() + 100 > mousePosition.y && mousePosition.y > 0,
+            bottom: $.global.MainCBounds.b() - 100 < mousePosition.y
+        };
+        if (sides.left) {
+            console.log("<-");
+        } else if (sides.right) {
+            console.log("->");
+        }
+        if (sides.top) {
+            console.log("^\n|");
+        } else if (sides.bottom) {
+            console.log("|\nv");
+        }
+    });
+};
 $.c.MainMap.prototype.listen = function (objs) {
     var player = objs.player;
     var pposX = -1 * (player.shape.x - $.global.MainWidth() / 2);
@@ -169,11 +223,7 @@ $.c.Player.prototype.bindEvt = function () {
 
     var mousePosition = $.global.MainC().mousePosition();
     var that = this;
-
     $.global.MainEC.addEventListener("mousedown", function (evt) {
-        console.log("x: " + mousePosition.x + ", y: " + mousePosition.y);
-        //this.shape.x = mousePosition.x;
-        //this.shape.y = mousePosition.y;
         _this.tX = mousePosition.x;
         _this.tY = mousePosition.y;
     }, false);
@@ -517,8 +567,27 @@ var FixtureSquare = function FixtureSquare(x, y, w, h) {
     this.y = y;
     this.w = w || 10;
     this.h = h || 10;
+    this.right = this.x + this.w;
+    this.bottom = this.y + this.h;
 };
 FixtureSquare.prototype = new Fixture.prototype.constructor();
+FixtureSquare.prototype.updateFeatures = function (x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.w = w || this.w;
+    this.h = h || this.h;
+    this.right = this.x + this.w;
+    this.bottom = this.y + this.h;
+};
+FixtureSquare.prototype.within = function (obj) {
+    var enumObj = {
+        LEFT: obj.x < this.x,
+        RIGHT: obj.right < this.right,
+        TOP: obj.y < this.bottom,
+        BOTTOM: obj.y < this.bottom
+    };
+    return enumObj.LEFT && enumObj.RIGHT && enumObj.TOP && enumObj.BOTTOM;
+};
 FixtureSquare.prototype.draw = function (ctx) {
     ctx.save();
     ctx.beginPath();
