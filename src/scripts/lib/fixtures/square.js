@@ -7,20 +7,18 @@ var FixtureSquare = function(x, y, w, h){
     this.bottom = this.y + this.h;
 };
 FixtureSquare.prototype = new Fixture.prototype.constructor;
-FixtureSquare.prototype.updateFeatures = function(x, y, w, h){
+FixtureSquare.prototype.updateFeatures = function(x, y){
     this.x = x;
     this.y = y;
-    this.w = w || this.w;
-    this.h = h || this.h;
     this.right = (this.x + this.w);
     this.bottom = (this.y + this.h);
 };
 FixtureSquare.prototype.within = function(obj){
     var enumObj = {
-        LEFT  : obj.x     < this.x,
-        RIGHT : obj.right < this.right,
-        TOP   : obj.y     < this.bottom,
-        BOTTOM: obj.y     < this.bottom
+        LEFT  : obj.x      <= this.x,
+        RIGHT : obj.right  >= this.right,
+        TOP   : obj.y      <= this.y,
+        BOTTOM: obj.bottom >= this.bottom
     };
     return (
         enumObj.LEFT  &&

@@ -7,13 +7,13 @@ function Fixture(){
     this.debug     = true;
 }
 Fixture.prototype.fillAndStroke = function(ctx){
-    ctx.fillStyle = this.style || false;
+    ctx.fillStyle = this.fillStyle || false;
     ctx.fill();
     if(this.lineWidth > 0){
         ctx.strokeStyle = this.strokeStyle || false;
         ctx.lineWidth = this.lineWidth || 0;
+        ctx.stroke();
     }
-    ctx.stroke();
     this.debug && this.showDebugMode(ctx);
 };
 Fixture.prototype.showDebugMode = function(ctx){

@@ -11,8 +11,16 @@ GRID.prototype.generate = function(){
     this.image = new Image();
     this.image.src = ctx.canvas.toDataURL("image/png");
 };
-GRID.prototype.render = function(contextTarget){
-    contextTarget.drawImage(this.image, 0, 0);
+GRID.prototype.render = function(contextTarget, source, distance){
+    contextTarget.drawImage(this.image, 
+                            source.x, 
+                            source.y, 
+                            source.w, 
+                            source.h, 
+                            distance.x,
+                            distance.y,
+                            distance.w,
+                            distance.h);
 };
 GRID.prototype._newPath = function(ctx, onNewPath){
     ctx.save();
